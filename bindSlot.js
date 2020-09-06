@@ -1,21 +1,31 @@
 export default function({ options }, render, name) {
-  options._slots = Object.assign(options._slots || {}, {
+  const slots = {};
+
+  if (options.extends && options.extends._slots) {
+    Object.assign(slots, options.extends._slots);
+  }
+
+  if (options._slots) {
+    Object.assign(slots, options._slots);
+  }
+
+  Object.assign(slots, {
     [name]: render
   });
-  const hook = function() {
-    const r = this.$options._slots[name].bind(this, this.$createElement);
-    this.$watch(
-        r,
-        t => {
-          this.$slots[name] = t;
-          this.$forceUpdate();
-        },
-        { immediate: true, deep: true }
-    )
-  };
-  options.created = (options.created || []).concat(hook);
-  options.activated = (options.activated || []).concat(function () {
+
+  options._slots = slots;
+
+  options.created = (options.created || []).concat(function () {
     this.$slots[name] = this.$options._slots[name].call(this, this.$createElement);
+
+    for (const [key, value] of Object.entries(this.$options._slots)) {
+      if (key === name) {
+        break;
+      }
+
+      this.$slots[key] = this.$options._slots[key].call(this, this.$createElement);
+    }
+
     this.$forceUpdate();
   });
 }
