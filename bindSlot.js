@@ -16,6 +16,16 @@ export default function({ options }, render, name) {
   options._slots = slots;
 
   options.created = (options.created || []).concat(function () {
+    const r = this.$options._slots[name].bind(this, this.$createElement);
+    this.$watch(
+        r,
+        t => {
+          this.$slots[name] = t;
+          this.$forceUpdate();
+        },
+        { immediate: true, deep: true }
+    );
+
     this.$slots[name] = this.$options._slots[name].call(this, this.$createElement);
 
     for (const [key, value] of Object.entries(this.$options._slots)) {
