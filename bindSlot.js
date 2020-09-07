@@ -17,6 +17,7 @@ export default function({ options }, render, name) {
 
   options.created = (options.created || []).concat(function () {
     const r = this.$options._slots[name].bind(this, this.$createElement);
+
     this.$watch(
         r,
         t => {
@@ -26,16 +27,15 @@ export default function({ options }, render, name) {
         { immediate: true, deep: true }
     );
 
-    this.$slots[name] = this.$options._slots[name].call(this, this.$createElement);
+    // this.$slots[name] = this.$options._slots[name].call(this, this.$createElement);
+    //
+    // for (const [key, value] of Object.entries(this.$options._slots)) {
+    //   if (key === name) {
+    //     break;
+    //   }
+    //
+    //   this.$slots[key] = this.$options._slots[key].call(this, this.$createElement);
 
-    for (const [key, value] of Object.entries(this.$options._slots)) {
-      if (key === name) {
-        break;
-      }
-
-      this.$slots[key] = this.$options._slots[key].call(this, this.$createElement);
-    }
-
-    this.$forceUpdate();
+    //this.$forceUpdate();
   });
 }
