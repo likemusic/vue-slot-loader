@@ -18,7 +18,6 @@ export default function ({options}, render, name) {
     const unwatchers = {};
 
     const initSlotsWatchers = function () {
-        debugger;
         updateWatcherBySlotName(name, this);
         updatePreviousWatchersBySlotName(name, this);
 
@@ -62,7 +61,6 @@ export default function ({options}, render, name) {
 
     options.created = (options.created || []).concat(initSlotsWatchers);
     options.beforeUpdate = (options.beforeUpdate || []).concat(function () {
-        debugger;
         const optionsSlots = this.$options._slots;
         const componentSlots = this.$slots;
 
