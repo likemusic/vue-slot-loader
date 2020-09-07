@@ -15,18 +15,63 @@ export default function ({options}, render, name) {
 
     options._slots = slots;
 
-    const initSlotsHook = function () {
-        this.$slots[name] = this.$options._slots[name].call(this, this.$createElement);
+    const unwatchers = {};
 
-        for (const [key, value] of Object.entries(this.$options._slots)) {
-            if (key === name) {
-                break;
+    const initSlotsWatchers = function () {
+        debugger;
+        updateWatcherBySlotName(name, this);
+        updatePreviousWatchersBySlotName(name, this);
+
+        function updateWatcherBySlotName(slotName, vm) {
+            unwatchIfWatcherExists(slotName);
+            setWatcherBySlotName(slotName, vm);
+
+
+            function setWatcherBySlotName(slotName, vm) {
+                const r = vm.$options._slots[slotName].bind(vm, vm.$createElement);
+                unwatchers[slotName] = vm.$watch(
+                    r,
+                    t => {
+                        vm.$slots[name] = t;
+                        vm.$forceUpdate();
+                    },
+                    {immediate: true, deep: true}
+                );
             }
 
-            this.$slots[key] = this.$options._slots[key].call(this, this.$createElement);
+            function unwatchIfWatcherExists(slotName) {
+                const unwatcher = unwatchers[slotName];
+                if (!unwatcher) {
+                    return;
+                }
+
+                unwatcher();
+            }
+        }
+
+        function updatePreviousWatchersBySlotName(slotName, vm) {
+            for (const [key, value] of Object.entries(vm.$options._slots)) {
+                if (key === name) {
+                    break;
+                }
+
+                updateWatcherBySlotName(key, vm);
+            }
         }
     };
 
-    options.created = (options.created || []).concat(initSlotsHook);
-    options.beforeUpdate = (options.beforeUpdate || []).concat(initSlotsHook);
+    options.created = (options.created || []).concat(initSlotsWatchers);
+    options.beforeUpdate = (options.beforeUpdate || []).concat(function () {
+        debugger;
+        const optionsSlots = this.$options._slots;
+        const componentSlots = this.$slots;
+
+        if (Object.keys(optionsSlots).length === Object.keys(componentSlots).length) {
+            return;
+        }
+
+        for (const [key, value] of Object.entries(optionsSlots)) {
+            componentSlots[key] = optionsSlots[key].call(this, this.$createElement);
+        }
+    });
 }
