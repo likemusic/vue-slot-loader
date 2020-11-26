@@ -64,7 +64,6 @@ export default function ({options}, render, name) {
     options.beforeUpdate = (options.beforeUpdate || []).concat(updateComponentSlots);
 
     function updateComponentSlots() {
-        debugger;
         const optionsSlots = this.$options._slots;
         const componentSlots = this.$slots;
 
